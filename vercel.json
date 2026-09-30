@@ -1,8 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/products/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/products/:path*", "destination": "/index" }
   ]
 }
