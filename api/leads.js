@@ -3,6 +3,17 @@ const PRODUCTION_ORIGINS = new Set([
   "https://www.pacificpurity.com",
 ]);
 
+const BRAND = {
+  name: "Pacific Purity",
+  navy: "#102033",
+  aqua: "#5ED8E8",
+  lime: "#CFF969",
+  mist: "#EEF5F5",
+  slate: "#526577",
+  border: "#D7E2E7",
+  logoUrl: "https://pacificpurity.com/manus-storage/pacific-purity-double-droplet.png",
+};
+
 const MAX_FIELD_LENGTHS = {
   name: 120,
   email: 254,
@@ -84,6 +95,50 @@ async function sendResendEmail({ apiKey, payload, idempotencyKey }) {
   return response.json().catch(() => ({}));
 }
 
+function documentStart(title) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>${escapeHtml(title)}</title>
+</head>
+<body style="margin:0; padding:0; background-color:${BRAND.mist};">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; background-color:${BRAND.mist};">
+    <tr>
+      <td align="center" bgcolor="${BRAND.mist}" style="padding-top:28px; padding-right:16px; padding-bottom:28px; padding-left:16px; background-color:${BRAND.mist};">`;
+}
+
+function documentEnd() {
+  return `</td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function brandHeader(kicker, heading, eyebrowColor = BRAND.lime) {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; background-color:${BRAND.navy};">
+  <tr>
+    <td bgcolor="${BRAND.navy}" style="padding-top:26px; padding-right:30px; padding-bottom:26px; padding-left:30px; background-color:${BRAND.navy};">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td valign="middle" style="padding-right:10px;">
+            <img src="${BRAND.logoUrl}" alt="Pacific Purity" width="38" height="38" border="0" style="display:block; width:38px; height:38px; border:0;">
+          </td>
+          <td valign="middle">
+            <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:18px; line-height:22px; font-weight:700; color:#FFFFFF;">Pacific Purity</p>
+          </td>
+        </tr>
+      </table>
+      <p style="margin-top:22px; margin-right:0; margin-bottom:7px; margin-left:0; font-family:Arial, Helvetica, sans-serif; font-size:11px; line-height:15px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:${eyebrowColor};">${escapeHtml(kicker)}</p>
+      <h1 style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:28px; line-height:34px; font-weight:700; color:#FFFFFF;">${escapeHtml(heading)}</h1>
+    </td>
+  </tr>
+</table>`;
+}
+
 function notificationEmail(lead, from, notificationTo) {
   const rows = [
     ["Name", lead.name],
@@ -99,7 +154,10 @@ function notificationEmail(lead, from, notificationTo) {
   ];
 
   const htmlRows = rows
-    .map(([label, value]) => `<tr><td style="padding:8px 12px;border:1px solid #dbe5e9;font-weight:700;vertical-align:top">${escapeHtml(label)}</td><td style="padding:8px 12px;border:1px solid #dbe5e9;vertical-align:top">${escapeHtml(value)}</td></tr>`)
+    .map(([label, value]) => `<tr>
+      <td valign="top" bgcolor="${BRAND.mist}" style="width:34%; padding-top:10px; padding-right:12px; padding-bottom:10px; padding-left:12px; border-top:1px solid ${BRAND.border}; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:19px; font-weight:700; color:${BRAND.navy}; background-color:${BRAND.mist};">${escapeHtml(label)}</td>
+      <td valign="top" style="padding-top:10px; padding-right:12px; padding-bottom:10px; padding-left:12px; border-top:1px solid ${BRAND.border}; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:19px; color:${BRAND.navy};">${escapeHtml(value)}</td>
+    </tr>`)
     .join("");
   const textRows = rows.map(([label, value]) => `${label}: ${value}`).join("\n");
 
@@ -108,8 +166,23 @@ function notificationEmail(lead, from, notificationTo) {
     to: [notificationTo],
     reply_to: lead.email,
     subject: `New Pacific Purity audit request — ${lead.productInterest}`,
-    html: `<!doctype html><html><body style="margin:0;background:#eef5f5;font-family:Arial,Helvetica,sans-serif;color:#102033"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden"><tr><td style="padding:24px 28px;background:#102033;color:#ffffff"><p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#cff969">New website lead</p><h1 style="margin:0;font-size:28px;line-height:34px">Free in-home water audit</h1></td></tr><tr><td style="padding:28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:14px;line-height:20px">${htmlRows}</table><p style="margin:24px 0 0;font-size:13px;line-height:20px;color:#526577">Reply directly to this message to contact the lead at ${escapeHtml(lead.email)}.</p></td></tr></table></td></tr></table></body></html>`,
-    text: `NEW PACIFIC PURITY AUDIT REQUEST\n\n${textRows}\n\nReply directly to this message to contact the lead.`,
+    html: `${documentStart("New Pacific Purity audit request")}
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:640px; background-color:#FFFFFF; border:1px solid ${BRAND.border}; border-radius:18px; overflow:hidden;">
+        <tr>
+          <td>${brandHeader("New website lead", "Free in-home water audit")}</td>
+        </tr>
+        <tr>
+          <td style="padding-top:28px; padding-right:30px; padding-bottom:30px; padding-left:30px;">
+            <p style="margin-top:0; margin-right:0; margin-bottom:18px; margin-left:0; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:24px; color:${BRAND.navy};">A new Pacific Purity audit request is ready for follow-up.</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-right:1px solid ${BRAND.border}; border-bottom:1px solid ${BRAND.border}; border-left:1px solid ${BRAND.border}; border-collapse:separate; border-spacing:0;">
+              ${htmlRows}
+            </table>
+            <p style="margin-top:22px; margin-right:0; margin-bottom:0; margin-left:0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; color:${BRAND.slate};">Reply directly to this message to contact the lead at <a href="mailto:${escapeHtml(lead.email)}" style="color:${BRAND.navy}; font-weight:700; text-decoration:underline;">${escapeHtml(lead.email)}</a>.</p>
+          </td>
+        </tr>
+      </table>
+    ${documentEnd()}`,
+    text: `PACIFIC PURITY — NEW WEBSITE LEAD\n\nFree in-home water audit\n\n${textRows}\n\nReply directly to this message to contact the lead.`,
     tags: [
       { name: "type", value: "website-lead" },
       { name: "product", value: lead.productInterest.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 100) || "general" },
@@ -119,13 +192,41 @@ function notificationEmail(lead, from, notificationTo) {
 
 function acknowledgementEmail(lead, from, notificationTo) {
   const firstName = escapeHtml(lead.name.split(/\s+/)[0] || "there");
+  const productInterest = escapeHtml(lead.productInterest);
+  const neighborhood = escapeHtml(lead.neighborhood || "to be confirmed");
+
   return {
     from,
     to: [lead.email],
     reply_to: notificationTo,
     subject: "We received your Pacific Purity audit request",
-    html: `<!doctype html><html><body style="margin:0;background:#eef5f5;font-family:Arial,Helvetica,sans-serif;color:#102033"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden"><tr><td style="padding:24px 28px;background:#102033;color:#ffffff"><p style="margin:0;font-size:20px;font-weight:700">Pacific Purity</p></td></tr><tr><td style="padding:30px 28px"><h1 style="margin:0 0 14px;font-size:28px;line-height:34px">Thanks, ${firstName}.</h1><p style="margin:0 0 16px;font-size:16px;line-height:24px">We received your request for a free in-home water audit. A Pacific Purity team member will contact you to schedule a time.</p><p style="margin:0;font-size:14px;line-height:21px;color:#526577">Your request: ${escapeHtml(lead.productInterest)}<br>Neighborhood: ${escapeHtml(lead.neighborhood || "to be confirmed")}</p></td></tr></table></td></tr></table></body></html>`,
-    text: `Thanks, ${lead.name.split(/\s+/)[0] || "there"}. We received your request for a free Pacific Purity in-home water audit. A team member will contact you to schedule a time.\n\nYour request: ${lead.productInterest}\nNeighborhood: ${lead.neighborhood || "to be confirmed"}`,
+    html: `${documentStart("Pacific Purity audit request received")}
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; background-color:#FFFFFF; border:1px solid ${BRAND.border}; border-radius:18px; overflow:hidden;">
+        <tr>
+          <td>${brandHeader("Audit request received", `Thanks, ${lead.name.split(/\s+/)[0] || "there"}.`, BRAND.aqua)}</td>
+        </tr>
+        <tr>
+          <td style="padding-top:30px; padding-right:30px; padding-bottom:18px; padding-left:30px;">
+            <p style="margin-top:0; margin-right:0; margin-bottom:16px; margin-left:0; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:25px; color:${BRAND.navy};">We received your request for a free in-home water audit. A Pacific Purity team member will contact you to schedule a time.</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; background-color:${BRAND.mist}; border-radius:12px;">
+              <tr>
+                <td bgcolor="${BRAND.mist}" style="padding-top:17px; padding-right:18px; padding-bottom:17px; padding-left:18px; background-color:${BRAND.mist};">
+                  <p style="margin-top:0; margin-right:0; margin-bottom:5px; margin-left:0; font-family:Arial, Helvetica, sans-serif; font-size:11px; line-height:15px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:${BRAND.slate};">Your request</p>
+                  <p style="margin-top:0; margin-right:0; margin-bottom:4px; margin-left:0; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:23px; font-weight:700; color:${BRAND.navy};">${productInterest}</p>
+                  <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; color:${BRAND.slate};">Neighborhood: ${neighborhood}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-top:4px; padding-right:30px; padding-bottom:30px; padding-left:30px;">
+            <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; color:${BRAND.slate};">Need to add a detail? Reply to this email and the Pacific Purity team will see it.</p>
+          </td>
+        </tr>
+      </table>
+    ${documentEnd()}`,
+    text: `Pacific Purity\n\nThanks, ${firstName}.\n\nWe received your request for a free in-home water audit. A Pacific Purity team member will contact you to schedule a time.\n\nYour request: ${productInterest}\nNeighborhood: ${neighborhood}\n\nNeed to add a detail? Reply to this email and the Pacific Purity team will see it.`,
     tags: [{ name: "type", value: "website-lead-acknowledgement" }],
   };
 }
