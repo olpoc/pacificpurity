@@ -5,9 +5,9 @@ const PRODUCTION_ORIGINS = new Set([
 
 const BRAND = {
   name: "Pacific Purity",
-  navy: "#102033",
-  aqua: "#5ED8E8",
-  lime: "#CFF969",
+  navy: "#0C1220",
+  aqua: "#93DCE8",
+  action: "#67CDF9",
   mist: "#EEF5F5",
   slate: "#526577",
   border: "#D7E2E7",
@@ -118,7 +118,7 @@ function documentEnd() {
 </html>`;
 }
 
-function brandHeader(kicker, heading, eyebrowColor = BRAND.lime) {
+function brandHeader(kicker, heading, eyebrowColor = BRAND.action) {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; background-color:${BRAND.navy};">
   <tr>
     <td bgcolor="${BRAND.navy}" style="padding-top:26px; padding-right:30px; padding-bottom:26px; padding-left:30px; background-color:${BRAND.navy};">
