@@ -8,6 +8,7 @@ const BRAND = {
   navy: "#0C1220",
   aqua: "#93DCE8",
   action: "#67CDF9",
+  coral: "#F99367",
   mist: "#EEF5F5",
   slate: "#526577",
   border: "#D7E2E7",
@@ -169,7 +170,7 @@ function notificationEmail(lead, from, notificationTo) {
     html: `${documentStart("New Pacific Purity audit request")}
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:640px; background-color:#FFFFFF; border:1px solid ${BRAND.border}; border-radius:18px; overflow:hidden;">
         <tr>
-          <td>${brandHeader("New website lead", "Free in-home water audit")}</td>
+          <td>${brandHeader("New website lead", "Free in-home water audit", BRAND.coral)}</td>
         </tr>
         <tr>
           <td style="padding-top:28px; padding-right:30px; padding-bottom:30px; padding-left:30px;">
@@ -203,7 +204,7 @@ function acknowledgementEmail(lead, from, notificationTo) {
     html: `${documentStart("Pacific Purity audit request received")}
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; background-color:#FFFFFF; border:1px solid ${BRAND.border}; border-radius:18px; overflow:hidden;">
         <tr>
-          <td>${brandHeader("Audit request received", `Thanks, ${lead.name.split(/\s+/)[0] || "there"}.`, BRAND.aqua)}</td>
+          <td>${brandHeader("Audit request received", `Thanks, ${lead.name.split(/\s+/)[0] || "there"}.`, BRAND.action)}</td>
         </tr>
         <tr>
           <td style="padding-top:30px; padding-right:30px; padding-bottom:18px; padding-left:30px;">
